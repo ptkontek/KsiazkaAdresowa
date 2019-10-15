@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1571067601 source:c:\users\hp\documents\c++\seminaria\ksiazkaadresowa\main.cpp
+1571166209 source:c:\users\hp\documents\c++\seminaria\ksiazkaadresowa\main.cpp
 	<iostream>
 	<windows.h>
 	<fstream>
