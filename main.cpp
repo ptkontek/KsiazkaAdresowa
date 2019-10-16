@@ -18,8 +18,12 @@ struct Adresat {
     string imie="", nazwisko="", numerTelefonu="", email="", adres="";
 };
 
-int rejestracja(vector <Uzytkownik> uzytkownicy, int iloscUzytkownikow) {
+void wczytajUzytkownikow(vector <Uzytkownik> &uzytkownicy);
+vector <Adresat> wczytajAdresatow(vector <Adresat> adresaci);
+
+int rejestracja(vector <Uzytkownik> &uzytkownicy, int iloscUzytkownikow) {
     Uzytkownik uzytkownik;
+    wczytajUzytkownikow(uzytkownicy);
     string nazwa, haslo;
     cout << "Podaj nazwe uzytkownika: ";
     cin >> nazwa;
@@ -68,17 +72,40 @@ int rejestracja(vector <Uzytkownik> uzytkownicy, int iloscUzytkownikow) {
 
         cout << "Uzytkownik zostal dodany do pliku txt." << endl;
         Sleep(1000);
-        // uzytkownicy[iloscUzytkownikow].nazwa = nazwa;
-        // uzytkownicy[iloscUzytkownikow].haslo = haslo;
-        // uzytkownicy[iloscUzytkownikow].idUzytkownika = iloscUzytkownikow+1;
-        cout << "Konto zalozone" << endl;
-        //  Sleep(1000);
-        return iloscUzytkownikow+1;
     }
+    cout << iloscUzytkownikow;
+    Sleep(1000);
+    return iloscUzytkownikow+1;
+
 }
 
-vector <Uzytkownik> wczytajUzytkownikow(vector <Uzytkownik> uzytkownicy);
-vector <Adresat> wczytajAdresatow(vector <Adresat> adresaci);
+int logowanie(vector <Uzytkownik> &uzytkownicy, int iloscUzytkownikow) {
+    Uzytkownik uzytkownik;
+    string nazwa, haslo;
+    cout << "Podaj nazwe uzytkownika: ";
+    cin >> nazwa;
+    int i = 0;
+    while (i < iloscUzytkownikow) {
+        if ( uzytkownicy[i].nazwa == nazwa) {
+            for ( int proby = 0; proby < 3; proby++) {
+                cout << "Podaj haslo. Pozostalo prob: " << 3-proby << ":";
+                cin >> haslo;
+                if (uzytkownicy[i].haslo == haslo) {
+                    cout << "Zalogowales sie." << endl;
+                    Sleep(1000);
+                    return uzytkownicy[i].idUzytkownika;
+                }
+
+            }
+            cout << "Podales 3 razy bledne haslo. Poczekaj 3 sekundy przed kolejnym zalogowaniem.";
+            Sleep(3000);
+        }
+        i++;
+    }
+    cout << "Nie ma uzytkownika o takiej nazwie." << endl;
+    return 0;
+}
+
 vector <Adresat> dodajOsobeDoKsiazkiAdresowej(vector <Adresat> adresaci, int iloscOsob);
 void wyszukajOsobePoImieniu(vector <Adresat> adresaci, int iloscOsob);
 void wyszukajOsobePoNazwisku(vector <Adresat> adresaci, int iloscOsob);
@@ -89,10 +116,23 @@ vector <Adresat> edytujAdresata(vector <Adresat> adresaci, int iloscOsob);
 int main() {
     vector <Uzytkownik> uzytkownicy;
     vector <Adresat> adresaci;
+    wczytajUzytkownikow(uzytkownicy);
+
     int idUzytkownika = 0;
     int iloscUzytkownikow = 0;
-    int iloscOsob = 0;
-    uzytkownicy = wczytajUzytkownikow(uzytkownicy);
+   int iloscOsob = 0;
+
+
+    cout<<"Lista wszystkich uzytk"<<endl;
+    for (int i=0; i<uzytkownicy.size(); i++) {
+        cout << endl << endl;
+        cout <<  uzytkownicy[i].idUzytkownika<< endl;
+        cout <<  uzytkownicy[i].nazwa<< endl;
+        cout <<  uzytkownicy[i].haslo<< endl;
+
+    }
+    getch();
+
     adresaci = wczytajAdresatow(adresaci);
 
     iloscOsob = adresaci.size();
@@ -107,9 +147,9 @@ int main() {
         cin >> wyborOpcjiMenu;
 
         if (wyborOpcjiMenu == '1') {
-            iloscUzytkownikow = rejestracja(uzytkownicy,iloscUzytkownikow);
+        iloscUzytkownikow = rejestracja(uzytkownicy,iloscUzytkownikow);
         } else if (wyborOpcjiMenu == '2') {
-            ;
+           idUzytkownika = logowanie(uzytkownicy, iloscUzytkownikow);
         } else if (wyborOpcjiMenu == '3') {
             exit(0);
         }
@@ -148,7 +188,7 @@ int main() {
     return 0;
 }
 
-vector <Uzytkownik> wczytajUzytkownikow(vector <Uzytkownik> uzytkownicy) {
+void wczytajUzytkownikow(vector <Uzytkownik> &uzytkownicy) {
     Uzytkownik uzytkownik;
     int iloscUzytkownikow = 0;
     string liniaWPliku;
@@ -179,12 +219,9 @@ vector <Uzytkownik> wczytajUzytkownikow(vector <Uzytkownik> uzytkownicy) {
             }
         }
         plik.close();
-        cout<<"Ilosc adresatow: "<<uzytkownicy.size()<<endl;
+        cout<<"Ilosc uzytkownikow: "<<uzytkownicy.size()<<endl;
 
-    } else if (plik.good()==false) {
-        cout<<"Brak uzytkownikow."<<endl;
     }
-    return uzytkownicy;
 }
 
 vector <Adresat> wczytajAdresatow(vector <Adresat> adresaci) {
