@@ -1,5 +1,0 @@
-1|Artur|Nowak|333 222 111|artur@nowak.pl|ul. Wesoła 3a; 33-300 Krakow|
-2|Bartek|Glowacki|333 222 111|bartek@glowacki.pl|ul. Słoneczna 61; 33-330 Krakow|
-3|Patrycja|Kontek|664432031|bpati@onet.pl|Korczaka 2|
-4|Ewelina|Kowalska|65323482|linka@onet.pl|Miodowa 12|
-5|Magdalena|Kontek|1234567|madzix@onet.pl|Korczaka 14|
