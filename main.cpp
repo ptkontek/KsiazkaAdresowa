@@ -40,22 +40,6 @@ int main() {
     int iloscUzytkownikow = 0;
     int iloscOsob = 0;
     wczytajUzytkownikow(uzytkownicy);
-    //wczytajAdresatow(adresaci, idUzytkownika);
-
-
-    cout<<"Lista wszystkich uzytk"<<endl;
-    for (int i=0; i<uzytkownicy.size(); i++) {
-        cout << endl << endl;
-        cout <<  uzytkownicy[i].idUzytkownika<< endl;
-        cout <<  uzytkownicy[i].nazwa<< endl;
-        cout <<  uzytkownicy[i].haslo<< endl;
-    }
-    getch();
-
-
-
-    iloscOsob = adresaci.size();
-    cout << iloscOsob <<endl;
 
     char wyborOpcjiMenu;
     while (true) {
@@ -72,8 +56,6 @@ int main() {
                 idUzytkownika = logowanie(uzytkownicy, iloscUzytkownikow);
                 adresaci = wczytajAdresatow(adresaci, idUzytkownika);
                 iloscOsob = adresaci.size();
-                cout << "ilosc osob po zalogowaniu" << endl;
-                getch();
             } else if (wyborOpcjiMenu == '3') {
                 exit(0);
             }
@@ -109,12 +91,12 @@ int main() {
                 zapisanieDoPlikuUzytkownicy(uzytkownicy);
             } else if (wyborOpcjiMenu == '8') {
                 idUzytkownika = 0;
+                adresaci.clear();
             } else if (wyborOpcjiMenu == '9') {
                 exit(0);
             }
         }
     }
-
     return 0;
 }
 
@@ -150,7 +132,6 @@ void wczytajUzytkownikow(vector <Uzytkownik> &uzytkownicy) {
         }
         plik.close();
         cout<<"Ilosc uzytkownikow: "<<uzytkownicy.size()<<endl;
-
     }
 }
 
@@ -189,7 +170,6 @@ vector <Adresat> wczytajAdresatow(vector <Adresat> adresaci, int idUzytkownika) 
                 adresat.adres = liniaWPliku;
                 break;
             }
-
             if (nrLinii >= 7) {
                 nrLinii = 1;
                 if (adresat.idUzytkownika == idUzytkownika) {
@@ -201,7 +181,6 @@ vector <Adresat> wczytajAdresatow(vector <Adresat> adresaci, int idUzytkownika) 
             }
         }
         plik.close();
-        cout<<"Ilosc adresatow: "<<adresaci.size()<<endl;
 
     } else if (plik.good()==false) {
         cout<<"Brak ksiazki adresowej. Wczytaj adresata by ja stworzyc."<<endl;
@@ -251,21 +230,13 @@ vector <Adresat> dodajOsobeDoKsiazkiAdresowej(vector <Adresat> adresaci, int ilo
 
     if (plik.good()) {
         plik << osobaId << "|" <<idUzytkownika << "|" << imie << "|" << nazwisko << "|" << numerTelefonu << "|" << email << "|" << adres << "|" << endl;
-
         plik.close();
 
-        cout << "Osoba zostala dodana." << endl;
-        Sleep(1000);
     } else {
         cout<<"Dodaje pierwszego adresata do nowej ksiazki adresowej."<<endl;
         ofstream plik( "Adresaci.txt" );
-
         plik << osobaId << "|" <<idUzytkownika << "|" << imie << "|" << nazwisko << "|" << numerTelefonu << "|" << email << "|" << adres << "|" << endl;
-
         plik.close();
-
-        cout << "Osoba zostala dodana." << endl;
-        Sleep(1000);
     }
     return adresaci;
 }
@@ -334,22 +305,11 @@ vector <Adresat> usunAdresata(vector <Adresat> &adresaci, int idUzytkownika) {
             czyIstniejeAdresat = true;
             adresaci.erase(itr);
             cout<<"Usunieto adresata o nr ID = " <<nrID<<endl;
-            fstream plik;
-            plik.open("Adresaci.txt",ios::out | ios::trunc );
-            plik.clear();
-            plik.flush();
-
-            for (vector<Adresat> ::iterator itr=adresaci.begin(); itr!=adresaci.end(); ++itr) {
-                if (plik.good()) {
-                    plik << itr->idAdresata << "|" << idUzytkownika << "|" << itr->imie << "|" << itr->nazwisko << "|" << itr->numerTelefonu << "|" << itr->email << "|" << itr->adres << "|" << endl;
-                }
-            }
-            plik.close();
+            zapisanieDoPlikuAdresaci(adresaci, nrID);
         }
     }
     if (czyIstniejeAdresat == false)
         cout << "Nie znaleziono adresata o numerze id: " << nrID << " w ksiazce adresowej" << endl;
-    getch();
     Sleep(1000);
 
     return adresaci;
@@ -410,18 +370,6 @@ vector <Adresat> edytujAdresata(vector <Adresat> adresaci, int idUzytkownika) {
         }
     }
     zapisanieDoPlikuAdresaci(adresaci, nrID);
-    /*fstream plik;
-    plik.open("Adresaci.txt",ios::out | ios::trunc );
-    plik.clear();
-    plik.flush();
-
-    for (vector<Adresat> ::iterator itr=adresaci.begin(); itr!=adresaci.end(); ++itr) {
-        if (plik.good()) {
-            plik << itr->idAdresata << "|" << idUzytkownika << "|" << itr->imie << "|" << itr->nazwisko << "|" << itr->numerTelefonu << "|" << itr->email << "|" << itr->adres << "|" << endl;
-        }
-    }
-    plik.close();
-    Sleep(1000); */
     return adresaci;
 }
 
@@ -440,7 +388,7 @@ void zmianaHasla(vector <Uzytkownik> &uzytkownicy, int idUzytkownika) {
 void zapisanieDoPlikuUzytkownicy(vector<Uzytkownik> &uzytkownicy) {
     fstream plik;
 
-    plik.open("Uzytkownicy.txt", ios::out); // pokieruj strumieñ danych z naszego programu do pliku
+    plik.open("Uzytkownicy.txt", ios::out);
     if(plik.good() == true) {
         for(int i = 0; i < uzytkownicy.size(); i++) {
             plik << uzytkownicy[i].idUzytkownika << "|";
@@ -451,7 +399,7 @@ void zapisanieDoPlikuUzytkownicy(vector<Uzytkownik> &uzytkownicy) {
         plik.close();
     } else {
         cout << "Nie udalo sie otworzyc pliku i zapisac do niego danych." << endl;
-        system("pause");
+        getch();
     }
 }
 
@@ -461,8 +409,9 @@ void zapisanieDoPlikuAdresaci(vector <Adresat> &adresaci, int nrID) {
     int nrLinii = 1;
 
     fstream plik, plikTymczasowy;
-    plik.open("Adresaci.txt",ios::in);
-    plik.open("Adresaci_tymczasowy.txt",ios::in);
+
+    plik.open("Adresaci.txt", ios::in);
+    plikTymczasowy.open("Adresaci_tymczasowy.txt", ios::out | ios::app);
 
     if (plik.good() == true) {
         while (getline(plik,liniaWPliku,'|')) {
@@ -489,46 +438,32 @@ void zapisanieDoPlikuAdresaci(vector <Adresat> &adresaci, int nrID) {
                 adresat.adres = liniaWPliku;
                 break;
             }
-
             if (nrLinii >= 7) {
-                nrLinii = 1;
                 if (adresat.idAdresata == nrID) {
-
-                    fstream plikTymczasowy;
-                    plik.open("Adresaci_tymczasowi.txt", ios::out | ios::app);
-
-                    if (plikTymczasowy.good()) {
-                        for (vector<Adresat> ::iterator itr=adresaci.begin(); itr!=adresaci.end(); ++itr) {
+                    for (vector<Adresat> ::iterator itr=adresaci.begin(); itr!=adresaci.end(); ++itr) {
+                        if (itr->idAdresata == nrID) {
                             if (plikTymczasowy.good()) {
                                 plikTymczasowy << itr->idAdresata << "|" << itr->idUzytkownika << "|" << itr->imie << "|" << itr->nazwisko << "|" << itr->numerTelefonu << "|" << itr->email << "|" << itr->adres << "|" << endl;
                             }
-                        }
-                        plikTymczasowy.close();
-                    } else {
-                        ofstream plik( "Adresaci_tymczasowi.txt" );
-                        for (vector<Adresat> ::iterator itr=adresaci.begin(); itr!=adresaci.end(); ++itr) {
-                            if (plikTymczasowy.good()) {
-                                plikTymczasowy << itr->idAdresata << "|" << itr->idUzytkownika << "|" << itr->imie << "|" << itr->nazwisko << "|" << itr->numerTelefonu << "|" << itr->email << "|" << itr->adres << "|" << endl;
-                            }
-                            plikTymczasowy.close();
                         }
                     }
+                } else {
+                    if (plikTymczasowy.good()) {
+                        plikTymczasowy << adresat.idAdresata << "|" << adresat.idUzytkownika << "|" << adresat.imie << "|" << adresat.nazwisko << "|" << adresat.numerTelefonu << "|" << adresat.email << "|" << adresat.adres << "|" << endl;
+                    }
                 }
-            } else if (adresat.idAdresata != nrID) {
-                if (plikTymczasowy.good()) {
-                    plikTymczasowy << adresat.idAdresata << "|" <<  adresat.idUzytkownika << "|" << adresat.imie << "|" << adresat.nazwisko << "|" << adresat.nazwisko << "|" << adresat.email << "|" << adresat.adres << "|" << endl;
-                    plikTymczasowy.close();
-                }
+                nrLinii = 1;
+            } else {
+                nrLinii++;
             }
-        } else {
-            nrLinii++;
         }
+        plikTymczasowy.close();
+        plik.close();
+        remove("Adresaci.txt");
+        rename("Adresaci_tymczasowy.txt", "Adresaci.txt");
+        getch();
     }
-    // plikTymczasowy.close();
-    plik.close();
 }
-
-
 
 int rejestracja(vector <Uzytkownik> &uzytkownicy, int iloscUzytkownikow) {
     Uzytkownik uzytkownik;
@@ -591,8 +526,10 @@ int logowanie(vector <Uzytkownik> &uzytkownicy, int iloscUzytkownikow) {
     cout << "Podaj nazwe uzytkownika: ";
     cin >> nazwa;
     int i = 0;
+    bool czyIstniejeUzytkownik = false;
     while (i < uzytkownicy.size()) {
         if ( uzytkownicy[i].nazwa == nazwa) {
+            czyIstniejeUzytkownik = true;
             for ( int proby = 0; proby < 3; proby++) {
                 cout << "Podaj haslo. Pozostalo prob: " << 3-proby << ":";
                 cin >> haslo;
@@ -601,13 +538,14 @@ int logowanie(vector <Uzytkownik> &uzytkownicy, int iloscUzytkownikow) {
                     getch();
                     return uzytkownicy[i].idUzytkownika;
                 }
-
             }
             cout << "Podales 3 razy bledne haslo. Poczekaj 3 sekundy przed kolejnym zalogowaniem.";
             Sleep(3000);
         }
         i++;
     }
-    cout << "Nie ma uzytkownika o takiej nazwie." << endl;
+    if (czyIstniejeUzytkownik == false)
+        cout << "Nie ma uzytkownika o takiej nazwie." << endl;
+    Sleep(1000);
     return 0;
 }
