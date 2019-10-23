@@ -22,13 +22,13 @@ struct Adresat {
 void zapisanieDoPlikuUzytkownicy(vector <Uzytkownik> &uzytkownicy);
 void zapisanieDoPlikuAdresaci(vector <Adresat> &adresaci, int nrID);
 void wczytajUzytkownikow(vector <Uzytkownik> &uzytkownicy);
-vector <Adresat> wczytajAdresatow(vector <Adresat> adresaci, int idUzytkownika);
+void wczytajAdresatow(vector <Adresat> &adresaci, int idUzytkownika, int &idOstatniegoAdresata);
 int rejestracja(vector <Uzytkownik> &uzytkownicy, int iloscUzytkownikow);
 int logowanie(vector <Uzytkownik> &uzytkownicy, int iloscUzytkownikow);
-vector <Adresat> dodajOsobeDoKsiazkiAdresowej(vector <Adresat> adresaci, int iloscOsob, int idUzytkownika);
-void wyszukajOsobePoImieniu(vector <Adresat> adresaci, int iloscOsob);
-void wyszukajOsobePoNazwisku(vector <Adresat> adresaci, int iloscOsob);
-void wyswietlWszystkichAdresatow(vector <Adresat> adresaci, int iloscOsob);
+vector <Adresat> dodajOsobeDoKsiazkiAdresowej(vector <Adresat> adresaci, int idUzytkownika, int &idOstatniegoAdresata);
+void wyszukajOsobePoImieniu(vector <Adresat> adresaci);
+void wyszukajOsobePoNazwisku(vector <Adresat> adresaci);
+void wyswietlWszystkichAdresatow(vector <Adresat> adresaci);
 vector <Adresat> usunAdresata(vector <Adresat> &adresaci, int idUzytkownika);
 vector <Adresat> edytujAdresata(vector <Adresat> adresaci, int idUzytkownika);
 void zmianaHasla(vector <Uzytkownik> &uzytkownicy, int idUzytkownika);
@@ -38,7 +38,7 @@ int main() {
     vector <Adresat> adresaci;
     int idUzytkownika = 0;
     int iloscUzytkownikow = 0;
-    int iloscOsob = 0;
+    int idOstatniegoAdresata = 0;
     wczytajUzytkownikow(uzytkownicy);
 
     char wyborOpcjiMenu;
@@ -54,8 +54,8 @@ int main() {
                 iloscUzytkownikow = rejestracja(uzytkownicy,iloscUzytkownikow);
             } else if (wyborOpcjiMenu == '2') {
                 idUzytkownika = logowanie(uzytkownicy, iloscUzytkownikow);
-                adresaci = wczytajAdresatow(adresaci, idUzytkownika);
-                iloscOsob = adresaci.size();
+                wczytajAdresatow(adresaci, idUzytkownika, idOstatniegoAdresata);
+                cout <<"ID ostatniego adresata"<<idOstatniegoAdresata<<endl;
             } else if (wyborOpcjiMenu == '3') {
                 exit(0);
             }
@@ -74,14 +74,13 @@ int main() {
             cin >> wyborOpcjiMenu;
 
             if (wyborOpcjiMenu == '1') {
-                adresaci = dodajOsobeDoKsiazkiAdresowej(adresaci, iloscOsob, idUzytkownika);
-                iloscOsob++;
+                adresaci = dodajOsobeDoKsiazkiAdresowej(adresaci, idUzytkownika, idOstatniegoAdresata);
             } else if (wyborOpcjiMenu == '2') {
-                wyszukajOsobePoImieniu(adresaci, iloscOsob);
+                wyszukajOsobePoImieniu(adresaci);
             } else if (wyborOpcjiMenu == '3') {
-                wyszukajOsobePoNazwisku(adresaci, iloscOsob);
+                wyszukajOsobePoNazwisku(adresaci);
             } else if (wyborOpcjiMenu == '4') {
-                wyswietlWszystkichAdresatow(adresaci, iloscOsob);
+                wyswietlWszystkichAdresatow(adresaci);
             } else if (wyborOpcjiMenu == '5') {
                 adresaci = usunAdresata(adresaci, idUzytkownika);
             } else if (wyborOpcjiMenu == '6') {
@@ -135,7 +134,7 @@ void wczytajUzytkownikow(vector <Uzytkownik> &uzytkownicy) {
     }
 }
 
-vector <Adresat> wczytajAdresatow(vector <Adresat> adresaci, int idUzytkownika) {
+void wczytajAdresatow(vector <Adresat> &adresaci, int idUzytkownika, int &idOstatniegoAdresata) {
     Adresat adresat;
     int iloscOsob = 0;
     string liniaWPliku;
@@ -172,6 +171,7 @@ vector <Adresat> wczytajAdresatow(vector <Adresat> adresaci, int idUzytkownika) 
             }
             if (nrLinii >= 7) {
                 nrLinii = 1;
+                idOstatniegoAdresata=adresat.idAdresata;
                 if (adresat.idUzytkownika == idUzytkownika) {
                     adresaci.push_back(adresat);
                     iloscOsob++;
@@ -185,10 +185,10 @@ vector <Adresat> wczytajAdresatow(vector <Adresat> adresaci, int idUzytkownika) 
     } else if (plik.good()==false) {
         cout<<"Brak ksiazki adresowej. Wczytaj adresata by ja stworzyc."<<endl;
     }
-    return adresaci;
+
 }
 
-vector <Adresat> dodajOsobeDoKsiazkiAdresowej(vector <Adresat> adresaci, int iloscOsob, int idUzytkownika) {
+vector <Adresat> dodajOsobeDoKsiazkiAdresowej(vector <Adresat> adresaci, int idUzytkownika, int &idOstatniegoAdresata) {
     Adresat adresat;
     string imie, nazwisko, numerTelefonu, email, adres;
 
@@ -212,7 +212,7 @@ vector <Adresat> dodajOsobeDoKsiazkiAdresowej(vector <Adresat> adresaci, int ilo
     if (adresaci.empty() == true) {
         osobaId = 1;
     } else {
-        osobaId = adresaci.back().idAdresata + 1;
+        osobaId = idOstatniegoAdresata+1;
     }
 
     adresat.idAdresata = osobaId;
@@ -241,12 +241,12 @@ vector <Adresat> dodajOsobeDoKsiazkiAdresowej(vector <Adresat> adresaci, int ilo
     return adresaci;
 }
 
-void wyszukajOsobePoImieniu(vector <Adresat> adresaci, int iloscOsob) {
+void wyszukajOsobePoImieniu(vector <Adresat> adresaci) {
     string imie="";
     cout<<"Podaj imie do wyszukania: ";
     cin >> imie;
 
-    for (int i=0; i<=iloscOsob; i++) {
+    for (int i=0; i<=adresaci.size(); i++) {
         if ( adresaci[i].imie == imie) {
             cout << endl << endl;
             cout << adresaci[i].idAdresata << endl;
@@ -260,12 +260,12 @@ void wyszukajOsobePoImieniu(vector <Adresat> adresaci, int iloscOsob) {
     getch();
 }
 
-void wyszukajOsobePoNazwisku(vector <Adresat> adresaci, int iloscOsob) {
+void wyszukajOsobePoNazwisku(vector <Adresat> adresaci) {
     string nazwisko="";
     cout<<"Podaj nazwisko do wyszukania: ";
     cin >> nazwisko;
 
-    for (int i=0; i<=iloscOsob; i++) {
+    for (int i=0; i<=adresaci.size(); i++) {
         if ( adresaci[i].nazwisko == nazwisko) {
             cout << endl << endl;
             cout << adresaci[i].idAdresata << endl;
@@ -279,10 +279,10 @@ void wyszukajOsobePoNazwisku(vector <Adresat> adresaci, int iloscOsob) {
     getch();
 }
 
-void wyswietlWszystkichAdresatow(vector <Adresat> adresaci, int iloscOsob) {
+void wyswietlWszystkichAdresatow(vector <Adresat> adresaci) {
 
     cout<<"Lista wszystkich adresatow"<<endl;
-    for (int i=0; i<iloscOsob; i++) {
+    for (int i=0; i<adresaci.size(); i++) {
         cout << endl << endl;
         cout << adresaci[i].idAdresata << endl;
         cout << adresaci[i].imie << endl;
