@@ -29,7 +29,7 @@ vector <Adresat> dodajOsobeDoKsiazkiAdresowej(vector <Adresat> adresaci, int idU
 void wyszukajOsobePoImieniu(vector <Adresat> adresaci);
 void wyszukajOsobePoNazwisku(vector <Adresat> adresaci);
 void wyswietlWszystkichAdresatow(vector <Adresat> adresaci);
-vector <Adresat> usunAdresata(vector <Adresat> &adresaci, int idUzytkownika);
+vector <Adresat> usunAdresata(vector <Adresat> &adresaci, int idUzytkownika, int &idOstaniegoAdresata);
 vector <Adresat> edytujAdresata(vector <Adresat> adresaci, int idUzytkownika);
 void zmianaHasla(vector <Uzytkownik> &uzytkownicy, int idUzytkownika);
 
@@ -55,7 +55,6 @@ int main() {
             } else if (wyborOpcjiMenu == '2') {
                 idUzytkownika = logowanie(uzytkownicy, iloscUzytkownikow);
                 wczytajAdresatow(adresaci, idUzytkownika, idOstatniegoAdresata);
-                cout <<"ID ostatniego adresata"<<idOstatniegoAdresata<<endl;
             } else if (wyborOpcjiMenu == '3') {
                 exit(0);
             }
@@ -82,7 +81,7 @@ int main() {
             } else if (wyborOpcjiMenu == '4') {
                 wyswietlWszystkichAdresatow(adresaci);
             } else if (wyborOpcjiMenu == '5') {
-                adresaci = usunAdresata(adresaci, idUzytkownika);
+                adresaci = usunAdresata(adresaci, idUzytkownika, idOstatniegoAdresata);
             } else if (wyborOpcjiMenu == '6') {
                 adresaci = edytujAdresata(adresaci, idUzytkownika);
             } else if (wyborOpcjiMenu == '7') {
@@ -174,7 +173,6 @@ void wczytajAdresatow(vector <Adresat> &adresaci, int idUzytkownika, int &idOsta
                 idOstatniegoAdresata=adresat.idAdresata;
                 if (adresat.idUzytkownika == idUzytkownika) {
                     adresaci.push_back(adresat);
-                    iloscOsob++;
                 }
             } else {
                 nrLinii++;
@@ -208,12 +206,7 @@ vector <Adresat> dodajOsobeDoKsiazkiAdresowej(vector <Adresat> adresaci, int idU
     getline(cin, adres);
 
     int osobaId;
-
-    if (adresaci.empty() == true) {
-        osobaId = 1;
-    } else {
-        osobaId = idOstatniegoAdresata+1;
-    }
+    osobaId=idOstatniegoAdresata+1;
 
     adresat.idAdresata = osobaId;
     adresat.idUzytkownika = idUzytkownika;
@@ -223,8 +216,8 @@ vector <Adresat> dodajOsobeDoKsiazkiAdresowej(vector <Adresat> adresaci, int idU
     adresat.email = email;
     adresat.adres = adres;
 
+    idOstatniegoAdresata=osobaId;
     adresaci.push_back(adresat);
-
     fstream plik;
     plik.open("Adresaci.txt", ios::out | ios::app);
 
@@ -294,7 +287,7 @@ void wyswietlWszystkichAdresatow(vector <Adresat> adresaci) {
     getch();
 }
 
-vector <Adresat> usunAdresata(vector <Adresat> &adresaci, int idUzytkownika) {
+vector <Adresat> usunAdresata(vector <Adresat> &adresaci, int idUzytkownika, int &idOstatniegoAdresata) {
     int nrID;
     cout << "Podaj nr ID adresata do usuniecia: ";
     cin >> nrID;
@@ -307,6 +300,10 @@ vector <Adresat> usunAdresata(vector <Adresat> &adresaci, int idUzytkownika) {
             cout<<"Usunieto adresata o nr ID = " <<nrID<<endl;
             zapisanieDoPlikuAdresaci(adresaci, nrID);
         }
+    }
+    if ( nrID == idOstatniegoAdresata)
+    {
+        idOstatniegoAdresata--;
     }
     if (czyIstniejeAdresat == false)
         cout << "Nie znaleziono adresata o numerze id: " << nrID << " w ksiazce adresowej" << endl;
