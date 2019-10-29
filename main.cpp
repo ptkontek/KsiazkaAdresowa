@@ -20,7 +20,7 @@ struct Adresat {
 };
 
 void zapisanieDoPlikuUzytkownicy(vector <Uzytkownik> &uzytkownicy);
-void zapisanieDoPlikuAdresaci(vector <Adresat> &adresaci, int nrID);
+void zapisanieDoPlikuAdresaci(vector <Adresat> &adresaci, int nrID, int &idOstatniegoAdresata);
 void wczytajUzytkownikow(vector <Uzytkownik> &uzytkownicy);
 void wczytajAdresatow(vector <Adresat> &adresaci, int idUzytkownika, int &idOstatniegoAdresata);
 int rejestracja(vector <Uzytkownik> &uzytkownicy, int iloscUzytkownikow);
@@ -30,7 +30,7 @@ void wyszukajOsobePoImieniu(vector <Adresat> adresaci);
 void wyszukajOsobePoNazwisku(vector <Adresat> adresaci);
 void wyswietlWszystkichAdresatow(vector <Adresat> adresaci);
 vector <Adresat> usunAdresata(vector <Adresat> &adresaci, int idUzytkownika, int &idOstaniegoAdresata);
-vector <Adresat> edytujAdresata(vector <Adresat> adresaci, int idUzytkownika);
+vector <Adresat> edytujAdresata(vector <Adresat> adresaci, int idUzytkownika, int &idOstaniegoAdresata);
 void zmianaHasla(vector <Uzytkownik> &uzytkownicy, int idUzytkownika);
 
 int main() {
@@ -83,7 +83,7 @@ int main() {
             } else if (wyborOpcjiMenu == '5') {
                 adresaci = usunAdresata(adresaci, idUzytkownika, idOstatniegoAdresata);
             } else if (wyborOpcjiMenu == '6') {
-                adresaci = edytujAdresata(adresaci, idUzytkownika);
+                adresaci = edytujAdresata(adresaci, idUzytkownika, idOstatniegoAdresata);
             } else if (wyborOpcjiMenu == '7') {
                 zmianaHasla(uzytkownicy, idUzytkownika);
                 zapisanieDoPlikuUzytkownicy(uzytkownicy);
@@ -170,7 +170,7 @@ void wczytajAdresatow(vector <Adresat> &adresaci, int idUzytkownika, int &idOsta
             }
             if (nrLinii >= 7) {
                 nrLinii = 1;
-                idOstatniegoAdresata=adresat.idAdresata;
+                idOstatniegoAdresata = adresat.idAdresata;
                 if (adresat.idUzytkownika == idUzytkownika) {
                     adresaci.push_back(adresat);
                 }
@@ -298,40 +298,38 @@ vector <Adresat> usunAdresata(vector <Adresat> &adresaci, int idUzytkownika, int
             czyIstniejeAdresat = true;
             adresaci.erase(itr);
             cout<<"Usunieto adresata o nr ID = " <<nrID<<endl;
-            zapisanieDoPlikuAdresaci(adresaci, nrID);
+            zapisanieDoPlikuAdresaci(adresaci, nrID, idOstatniegoAdresata);
         }
     }
-    if ( nrID == idOstatniegoAdresata)
-    {
-        idOstatniegoAdresata--;
-    }
-    if (czyIstniejeAdresat == false)
+    if (czyIstniejeAdresat == false) {
         cout << "Nie znaleziono adresata o numerze id: " << nrID << " w ksiazce adresowej" << endl;
-    Sleep(1000);
-
+        Sleep(1000);
+    }
     return adresaci;
 }
 
-vector <Adresat> edytujAdresata(vector <Adresat> adresaci, int idUzytkownika) {
+vector <Adresat> edytujAdresata(vector <Adresat> adresaci, int idUzytkownika, int &idOstatniegoAdresata) {
     int nrID;
+    bool czyIstniejeAdresat = false;
     cout << "Podaj nr ID adresata do edycji: ";
     cin >> nrID;
-    cout<< "Wybierz dane do edycji: ";
-    Sleep(1000);
     char wybor;
 
     system("cls");
-    cout << "1. Imie" << endl;
-    cout << "2. Nazwisko" << endl;
-    cout << "3. Numer telefonu" << endl;
-    cout << "4. E-mail" << endl;
-    cout << "5. Adres" << endl;
-    cout << "6. Powrot do menu" << endl;
-    cin >> wybor;
-    string zmiana;
 
     for (vector<Adresat> ::iterator itr=adresaci.begin(); itr!=adresaci.end()+1; ++itr) {
         if (itr->idAdresata == nrID) {
+            czyIstniejeAdresat = true;
+            cout << "Wybierz dane do edycji: " << endl;
+            cout << "1. Imie" << endl;
+            cout << "2. Nazwisko" << endl;
+            cout << "3. Numer telefonu" << endl;
+            cout << "4. E-mail" << endl;
+            cout << "5. Adres" << endl;
+            cout << "6. Powrot do menu" << endl;
+            cin >> wybor;
+            string zmiana;
+
             if (wybor == '1') {
                 cout << "Podaj nowe imie: ";
                 cin >>zmiana;
@@ -342,13 +340,11 @@ vector <Adresat> edytujAdresata(vector <Adresat> adresaci, int idUzytkownika) {
                 cin >>zmiana;
                 itr->nazwisko=zmiana;
 
-
             } else if (wybor == '3') {
                 cout << "Podaj nowy numer telefonu: ";
                 cin.sync();
                 getline(cin, zmiana);
                 itr->numerTelefonu=zmiana;
-
 
             } else if (wybor == '4') {
                 cout << "Podaj nowy e-mail: ";
@@ -364,9 +360,13 @@ vector <Adresat> edytujAdresata(vector <Adresat> adresaci, int idUzytkownika) {
             } else if (wybor == '6') {
                 exit(0);
             }
+            zapisanieDoPlikuAdresaci(adresaci, nrID, idOstatniegoAdresata);
         }
     }
-    zapisanieDoPlikuAdresaci(adresaci, nrID);
+    if (czyIstniejeAdresat == false) {
+        cout << "Nie znaleziono adresata o numerze id: " << nrID << " w ksiazce adresowej" << endl;
+        getch();
+    }
     return adresaci;
 }
 
@@ -400,7 +400,7 @@ void zapisanieDoPlikuUzytkownicy(vector<Uzytkownik> &uzytkownicy) {
     }
 }
 
-void zapisanieDoPlikuAdresaci(vector <Adresat> &adresaci, int nrID) {
+void zapisanieDoPlikuAdresaci(vector <Adresat> &adresaci, int nrID, int &idOstatniegoAdresata) {
     Adresat adresat;
     string liniaWPliku;
     int nrLinii = 1;
@@ -440,12 +440,13 @@ void zapisanieDoPlikuAdresaci(vector <Adresat> &adresaci, int nrID) {
                     for (vector<Adresat> ::iterator itr=adresaci.begin(); itr!=adresaci.end(); ++itr) {
                         if (itr->idAdresata == nrID) {
                             if (plikTymczasowy.good()) {
-                                plikTymczasowy << itr->idAdresata << "|" << itr->idUzytkownika << "|" << itr->imie << "|" << itr->nazwisko << "|" << itr->numerTelefonu << "|" << itr->email << "|" << itr->adres << "|" << endl;
+                                plikTymczasowy << adresat.idAdresata << "|" << itr->idUzytkownika << "|" << itr->imie << "|" << itr->nazwisko << "|" << itr->numerTelefonu << "|" << itr->email << "|" << itr->adres << "|" << endl;
                             }
                         }
                     }
                 } else {
                     if (plikTymczasowy.good()) {
+                        idOstatniegoAdresata = adresat.idAdresata;
                         plikTymczasowy << adresat.idAdresata << "|" << adresat.idUzytkownika << "|" << adresat.imie << "|" << adresat.nazwisko << "|" << adresat.numerTelefonu << "|" << adresat.email << "|" << adresat.adres << "|" << endl;
                     }
                 }
